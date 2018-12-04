@@ -1,50 +1,85 @@
 'use strict';
 
-import * as vscode from 'vscode';
+import { window, ExtensionContext, commands, TextEditor } from 'vscode';
+import { resolveFilePathFromURI, returnImportFilepathString } from './filesystem.utils';
 
-import { copyToClipboard } from './utils/clipboard';
-import { showInformationMessage, showErrorMessage } from './utils/messaging';
-import { resolveFilePathFromURI, getActiveDocumentDirectory, returnImportFilepathString } from './utils/filesystem';
-import { insertTextToActiveDocument } from './utils/documentEditor';
+const copypaste = require("copy-paste");
+const copyToClipboard = (stringToCopy: string) => {
+    return copypaste.copy(stringToCopy);
+}
 
-const errorMessageHandler = vscode.window.showErrorMessage;
-const informationMessageHandler = vscode.window.showInformationMessage;
+const setStatusBarMessage = (message: string) => {
+    return window.setStatusBarMessage(message, 10)
+}
 
+const showInformationMessage = (message: string) => {
+    return window.showInformationMessage(message);
+}
 
-export function activate(context: vscode.ExtensionContext) {
+const showErrorMessage = (message: string) => {
+    return window.showErrorMessage(message);
+}
+
+const insertTextToActiveDocument = (activeDocumentTextEditor: TextEditor, textToInsert: string) => {
+    activeDocumentTextEditor.edit(
+        edit => activeDocumentTextEditor.selections.forEach(
+            selection => {
+                edit.delete(selection)
+                edit.insert(selection.start, textToInsert.toString())
+            }
+        )
+    )
+}
+
+export function activate(context: ExtensionContext) {
     const disposableArray = [];
 
-    let targetFilePath = null
+    let targetFilePath: string = ''
 
-    disposableArray.push(vscode.commands.registerCommand('relativeImport.copyPath', (uri) => {
+    disposableArray.push(commands.registerCommand('relativeImport.copyPath', (uri) => {
         if(uri && uri.path) {
             targetFilePath = resolveFilePathFromURI(uri.path)
             copyToClipboard(targetFilePath);
-            showInformationMessage(informationMessageHandler, `Copied ${targetFilePath} to clipboard for re-use.`)
+            showInformationMessage(`Copied ${targetFilePath} to clipboard for re-use.`)
+            setStatusBarMessage(`Copied ${targetFilePath} to clipboard for re-use.`)
         } else {
-            showErrorMessage(errorMessageHandler, 'No file found');
+            showErrorMessage('No file found');
         }
     }));
 
-    disposableArray.push(vscode.commands.registerCommand('relativeImport.pastePath', () => {
-        const activeTextEditor = vscode.window.activeTextEditor;
+    disposableArray.push(commands.registerCommand('relativeImport.pastePath', () => {
+        if (!targetFilePath) {
+            showInformationMessage('Unable to resolve target file.')
+        }
+
+        const activeTextEditor = window.activeTextEditor;
+
+        if (!activeTextEditor) {
+            throw new Error('Could not detect Active text Editor')
+        }
+
         const activeTextEditorDocument = activeTextEditor.document;
 
-        if (!targetFilePath) {
-            showInformationMessage(informationMessageHandler, 'Unable to resolve target file.')
+
+        if (!(activeTextEditorDocument.uri && activeTextEditorDocument.uri.scheme)) {
+            throw new Error('Could not detect active text editor file')
+        }
+
+        if (activeTextEditorDocument.uri.scheme !== 'file') {
+            showErrorMessage('Unable to resolve path. Check if the file is in disk.');
         }
 
         if (activeTextEditorDocument.uri.scheme === 'file') {
-            const activeFileDirectoryPath = getActiveDocumentDirectory(activeTextEditorDocument.fileName);
-            const pathToBeImported = returnImportFilepathString(activeFileDirectoryPath, targetFilePath);
+            const pathToBeImported = returnImportFilepathString(activeTextEditorDocument.fileName, targetFilePath);
 
             if (pathToBeImported.includes("node_modules")) {
-                showInformationMessage(informationMessageHandler, 'Detected node_modules in file path. Is this intended?')
+                showInformationMessage('Detected node_modules in file path. Is this intended?')
             }
-            insertTextToActiveDocument(vscode.window.activeTextEditor, pathToBeImported);
-        } else {
-            showErrorMessage(errorMessageHandler, 'Unable to resolve path. Check if the file is in disk.');
-        }
+            return insertTextToActiveDocument(activeTextEditor, pathToBeImported);
+        } 
+        
+        
+        showErrorMessage('Ooops! Unable to resolve path.');
     }));
 
     context.subscriptions.concat(disposableArray);
