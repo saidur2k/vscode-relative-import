@@ -4,7 +4,10 @@ All notable changes to the "relative-import" extension will be documented in thi
 ## [Unreleased]
 - Better warning messaging
 
-## [1.2.1
+## [1.2.2]
+- Minor updates
+
+## [1.2.1]
 - Show error messages instead of throwing Javascript errors
 
 ## [1.2.0]

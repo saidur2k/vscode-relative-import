@@ -2,15 +2,24 @@
     "name": "relative-import",
     "displayName": "Relative Import",
     "description": "VS Code package to make it super easy to write your import or require statements for JavaScript / TypeScript / Flow.",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "engines": {
         "vscode": "^1.29.0"
     },
     "publisher": "saidur2",
+    "homepage": "https://github.com/saidur2k/vscode-relative-import/blob/master/README.md",
     "repository": "https://github.com/saidur2k/vscode-relative-import",
+    "galleryBanner": {
+        "color": "#000000",
+        "theme": "dark"
+    },
+    "license": "SEE LICENSE IN LICENSE.md",
     "categories": [
         "Other"
     ],
+    "bugs": {
+        "url": "https://github.com/saidur2k/vscode-relative-import/issues"
+    },
     "activationEvents": [
         "onCommand:relativeImport.copyPath",
         "onCommand:relativeImport.copyCurrentDocumentPath",
