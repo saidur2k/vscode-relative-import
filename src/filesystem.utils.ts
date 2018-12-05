@@ -8,7 +8,6 @@ export const resolveFilePathFromURI = (input: string) : string=> {
     } catch (err) {
         throw new Error('Error resolving file path from URI')
     }
-    
 }
 
 export const getDocumentDirectory = (activeDocumentFilePath: string) => {
