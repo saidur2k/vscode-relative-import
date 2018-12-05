@@ -63,13 +63,15 @@ const getActiveEditorFile = () => {
     const activeTextEditor = window.activeTextEditor;
 
     if (!activeTextEditor) {
-        throw new Error('Could not detect Active text Editor.')
+        showErrorMessage('Could not detect Active text Editor.');
+        return "";
     }
 
     const activeTextEditorDocument = activeTextEditor.document;
 
     if (!(activeTextEditorDocument.uri && activeTextEditorDocument.uri.scheme)) {
-        throw new Error('Could not detect active text editor file.')
+        showErrorMessage('Could not detect active text editor file.');
+        return "";
     }
 
     if (activeTextEditorDocument.uri.scheme === 'file') {
@@ -128,6 +130,7 @@ function workspaceFiles(): void {
         });
       })
 }
+
 export function activate(context: ExtensionContext) {
     const disposableArray = [];
 
@@ -158,7 +161,8 @@ export function activate(context: ExtensionContext) {
         const activeTextEditor = window.activeTextEditor;
 
         if (!activeTextEditor) {
-            throw new Error('Could not detect Active text Editor.')
+            showErrorMessage('Could not detect Active text Editor.');
+            return "";
         }
 
         const activeTextEditorDocument = getActiveEditorFile();
@@ -167,7 +171,7 @@ export function activate(context: ExtensionContext) {
             const pathToBeImported = returnImportFilepathString(activeTextEditorDocument, targetFilePath);
 
             if (pathToBeImported.includes("node_modules")) {
-                showInformationMessage('Detected node_modules in file path. Is this intended?')
+                showInformationMessage('Detected node_modules in file path. Is this intended?');
             }
 
             return insertTextToActiveDocument(activeTextEditor, pathToBeImported);
@@ -177,7 +181,7 @@ export function activate(context: ExtensionContext) {
     }));
 
     disposableArray.push(commands.registerCommand('relativeImport.quickPick', () => {
-        workspaceFiles()
+        workspaceFiles();
     }));
 
     context.subscriptions.concat(disposableArray);

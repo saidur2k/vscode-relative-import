@@ -19,6 +19,9 @@ Copy/paste path from same directory
 
 ## Release Notes
 
+### 1.2.1
+Show error messages instead of throwing Javascript errors
+
 ### 1.2.0
 Add Quick Pick in Active Editor
 

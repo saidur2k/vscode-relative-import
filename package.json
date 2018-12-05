@@ -2,7 +2,7 @@
     "name": "relative-import",
     "displayName": "Relative Import",
     "description": "VS Code package to make it super easy to write your import or require statements for JavaScript / TypeScript / Flow.",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "engines": {
         "vscode": "^1.29.0"
     },
