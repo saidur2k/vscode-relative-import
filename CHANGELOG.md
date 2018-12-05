@@ -3,9 +3,11 @@ All notable changes to the "relative-import" extension will be documented in thi
 
 ## [Unreleased]
 - Better warning messaging
-- Quick picker within workspace
 
-## 1.1.2
+## [1.2.0]
+Add Quick Pick in Active Editor
+
+## [1.1.2]
 - Minor documentation changes and add GIPHY for demo
 
 ## [1.1.1]

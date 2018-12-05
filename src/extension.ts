@@ -1,6 +1,7 @@
 'use strict';
 
-import { window, ExtensionContext, commands, TextEditor } from 'vscode';
+import { window, ExtensionContext, commands, TextEditor, QuickPickItem, workspace } from 'vscode';
+import * as glob from 'glob';
 import { resolveFilePathFromURI, returnImportFilepathString } from './filesystem.utils';
 
 const copypaste = require("copy-paste");
@@ -43,6 +44,90 @@ const setTargetFile = (input: string) => {
         return ""
     }
 }
+
+function getWorkspaceFolder() {
+    const editor = window.activeTextEditor;
+    if (editor) {
+        const res = editor.document.uri;
+        const folder = workspace.getWorkspaceFolder(res);
+        if (folder) {
+            return folder.uri.fsPath.replace(/\\/g, "/");
+        } else {
+            showErrorMessage('Error getting workspace path');
+        }
+    }
+}
+
+
+const getActiveEditorFile = () => {
+    const activeTextEditor = window.activeTextEditor;
+
+    if (!activeTextEditor) {
+        throw new Error('Could not detect Active text Editor.')
+    }
+
+    const activeTextEditorDocument = activeTextEditor.document;
+
+    if (!(activeTextEditorDocument.uri && activeTextEditorDocument.uri.scheme)) {
+        throw new Error('Could not detect active text editor file.')
+    }
+
+    if (activeTextEditorDocument.uri.scheme === 'file') {
+        return activeTextEditorDocument.fileName;
+    } else {
+        showErrorMessage('Unable to resolve path. Check if the file is in disk.');
+        return "";
+    }
+}
+
+
+function workspaceFiles(): void {
+    const workspacePath = getWorkspaceFolder();
+
+    // Search for files
+    return glob(`${workspacePath}/**/*.*`, {
+        ignore: [
+            `${workspacePath}/node_modules/**/*.*`
+        ]
+    }, function (err: Error | null, items: string[]) {
+
+        if (err) {
+            showErrorMessage(err.message);
+        }
+
+        let paths: QuickPickItem[];
+
+        if (items.length > 0) {
+            paths = items.map((val: string) => {
+                let item: QuickPickItem = { description: val, label: "" + val.split("/").pop() };
+                return item;
+            });
+        } else {
+            let emptyItem: QuickPickItem = { label: "", description: "No files found" };
+            paths = [emptyItem]
+        }
+
+        const activeTextEditor = window.activeTextEditor;
+
+        if (!activeTextEditor) {
+            throw new Error('Could not detect Active text Editor.')
+        }
+
+        let pickResult: Thenable<QuickPickItem | undefined>;
+        pickResult = window.showQuickPick(paths, { matchOnDescription: true, placeHolder: `Type to filter ${items.length} files` });
+        pickResult.then((item: QuickPickItem | undefined) => {
+            const activeTextEditorDocument = getActiveEditorFile();
+
+            if (activeTextEditorDocument && item && item.description) {
+                const pathToBeImported = returnImportFilepathString(activeTextEditorDocument, item.description);
+                return insertTextToActiveDocument(activeTextEditor, pathToBeImported);
+            } else {
+                showErrorMessage('Could not set path from quick pick.');
+            }
+
+        });
+      })
+}
 export function activate(context: ExtensionContext) {
     const disposableArray = [];
 
@@ -76,28 +161,23 @@ export function activate(context: ExtensionContext) {
             throw new Error('Could not detect Active text Editor.')
         }
 
-        const activeTextEditorDocument = activeTextEditor.document;
+        const activeTextEditorDocument = getActiveEditorFile();
 
-
-        if (!(activeTextEditorDocument.uri && activeTextEditorDocument.uri.scheme)) {
-            throw new Error('Could not detect active text editor file.')
-        }
-
-        if (activeTextEditorDocument.uri.scheme !== 'file') {
-            showErrorMessage('Unable to resolve path. Check if the file is in disk.');
-        }
-
-        if (activeTextEditorDocument.uri.scheme === 'file') {
-            const pathToBeImported = returnImportFilepathString(activeTextEditorDocument.fileName, targetFilePath);
+        if (activeTextEditorDocument) {
+            const pathToBeImported = returnImportFilepathString(activeTextEditorDocument, targetFilePath);
 
             if (pathToBeImported.includes("node_modules")) {
                 showInformationMessage('Detected node_modules in file path. Is this intended?')
             }
+
             return insertTextToActiveDocument(activeTextEditor, pathToBeImported);
-        } 
-        
+        }
         
         showErrorMessage('Ooops! Unable to resolve path.');
+    }));
+
+    disposableArray.push(commands.registerCommand('relativeImport.quickPick', () => {
+        workspaceFiles()
     }));
 
     context.subscriptions.concat(disposableArray);
