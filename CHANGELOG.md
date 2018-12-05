@@ -3,6 +3,10 @@ All notable changes to the "relative-import" extension will be documented in thi
 
 ## [Unreleased]
 - Better warning messaging
+- Quick picker within workspace
+
+## 1.1.2
+- Minor documentation changes and add GIPHY for demo
 
 ## [1.1.1]
 - Minor documentation changes
