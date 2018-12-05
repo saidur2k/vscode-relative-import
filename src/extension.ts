@@ -31,21 +31,39 @@ const insertTextToActiveDocument = (activeDocumentTextEditor: TextEditor, textTo
     )
 }
 
+const setTargetFile = (input: string) => {
+    if(input) {
+        const targetFilePath = resolveFilePathFromURI(input)
+        copyToClipboard(targetFilePath);
+        showInformationMessage(`Copied ${targetFilePath} to clipboard for re-use.`)
+        setStatusBarMessage(`Copied ${targetFilePath} to clipboard for re-use.`)
+        return targetFilePath
+    } else {
+        showErrorMessage('Error setting target file path.');
+        return ""
+    }
+}
 export function activate(context: ExtensionContext) {
     const disposableArray = [];
 
-    let targetFilePath: string = ''
+    let targetFilePath: string
 
     disposableArray.push(commands.registerCommand('relativeImport.copyPath', (uri) => {
         if(uri && uri.path) {
-            targetFilePath = resolveFilePathFromURI(uri.path)
-            copyToClipboard(targetFilePath);
-            showInformationMessage(`Copied ${targetFilePath} to clipboard for re-use.`)
-            setStatusBarMessage(`Copied ${targetFilePath} to clipboard for re-use.`)
+            targetFilePath = setTargetFile(uri.path)
         } else {
-            showErrorMessage('No file found');
+            showErrorMessage('Error setting target file path from this context.');
         }
     }));
+
+    disposableArray.push(commands.registerCommand('relativeImport.copyCurrentDocumentPath', () => {
+        if(window.activeTextEditor && window.activeTextEditor.document && window.activeTextEditor.document.uri.scheme === 'file' ) {
+            targetFilePath = setTargetFile(window.activeTextEditor.document.fileName)
+        } else {
+            showErrorMessage('Error setting target file path from the active editor.');
+        }
+    }));
+
 
     disposableArray.push(commands.registerCommand('relativeImport.pastePath', () => {
         if (!targetFilePath) {
@@ -55,14 +73,14 @@ export function activate(context: ExtensionContext) {
         const activeTextEditor = window.activeTextEditor;
 
         if (!activeTextEditor) {
-            throw new Error('Could not detect Active text Editor')
+            throw new Error('Could not detect Active text Editor.')
         }
 
         const activeTextEditorDocument = activeTextEditor.document;
 
 
         if (!(activeTextEditorDocument.uri && activeTextEditorDocument.uri.scheme)) {
-            throw new Error('Could not detect active text editor file')
+            throw new Error('Could not detect active text editor file.')
         }
 
         if (activeTextEditorDocument.uri.scheme !== 'file') {

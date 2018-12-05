@@ -1,8 +1,10 @@
 import * as path from 'path';
 
+const sanitizePath = (input: any) => input.toString().replace(/\\/g, "/");
+
 export const resolveFilePathFromURI = (input: string) : string=> {
     try {
-        return path.resolve(input).toString();
+        return sanitizePath(path.resolve(input).toString());
     } catch (err) {
         throw new Error('Error resolving file path from URI')
     }
@@ -10,18 +12,21 @@ export const resolveFilePathFromURI = (input: string) : string=> {
 }
 
 export const getDocumentDirectory = (activeDocumentFilePath: string) => {
-    return path.dirname(
-        path.resolve(activeDocumentFilePath.toString())
-    ).toString();
+    return sanitizePath(
+        path.dirname(
+            path.resolve(activeDocumentFilePath.toString()
+        )
+    ).toString());
 }
 
 export const returnImportFilepathString = (activeFile: string, targetFilePath: string) => {
-    const resolvedActiveDirectory = path.resolve(getDocumentDirectory(activeFile))
-    const resolvedTargetFile = path.resolve(targetFilePath)
+    const resolvedActiveDirectory = sanitizePath(path.resolve(getDocumentDirectory(activeFile)))
+    const resolvedTargetFile = sanitizePath(path.resolve(targetFilePath))
     
-    const resolvedTargetFileDirectory = getDocumentDirectory(resolvedTargetFile.toString())
+    const resolvedTargetFileDirectory = getDocumentDirectory(resolvedTargetFile)
 
-    const relativePath = path.relative(resolvedActiveDirectory, resolvedTargetFile).toString();
+    const relativePath = sanitizePath(path.relative(resolvedActiveDirectory, resolvedTargetFile));
+
     if ((resolvedActiveDirectory === resolvedTargetFileDirectory) || (resolvedTargetFileDirectory.startsWith(resolvedActiveDirectory))) {
         return './' + relativePath;
     }

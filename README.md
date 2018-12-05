@@ -1,4 +1,4 @@
-# import-path README
+# relative-import README
 
 VS Code package to make it super easy to write import or require statements for your JavaScript / TypeScript.
 
@@ -10,7 +10,7 @@ TODO: INSERT GIPHY
 
 ### 1.0.0
 
-Initial release of import-path
+Initial release of relative-import
 
 -----------------------------------------------------------------------------------------------------------
 

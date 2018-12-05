@@ -1,10 +1,11 @@
 # Change Log
-All notable changes to the "import-path" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+All notable changes to the "relative-import" extension will be documented in this file.
 
 ## [Unreleased]
 - Better warning messaging
+
+## [1.0.1]
+- Add key bindings for extension
 
 ## [1.0.0]
 - Initial release
