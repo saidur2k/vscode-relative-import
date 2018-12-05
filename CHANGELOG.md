@@ -4,6 +4,9 @@ All notable changes to the "relative-import" extension will be documented in thi
 ## [Unreleased]
 - Better warning messaging
 
+## [1.1.1]
+- Minor documentation changes
+
 ## [1.1.0]
 - Add key bindings for extension
 
