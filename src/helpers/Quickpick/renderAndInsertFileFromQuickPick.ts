@@ -25,6 +25,7 @@ export const renderAndInsertFileFromQuickPick = (workspaceFileManager: Workspace
         pickResult.then((item: QuickPickItem | undefined) => {
 
             if (item && item.description) {
+                relativeImport.targetFile = item.description;
                 return insertTextToActiveDocument(relativeImport.getRelativePath());
             }
         });
