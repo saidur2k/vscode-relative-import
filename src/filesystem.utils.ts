@@ -1,34 +1,29 @@
 import * as path from 'path';
 
-const sanitizePath = (input: any) => input.toString().replace(/\\/g, "/");
+export const sanitizePath = (input: string): string => {
+    const sanitizedInputString: string = input.replace(/\\/g, "/");
+    return (path.resolve(sanitizedInputString)).toString();
+};
 
-export const resolveFilePathFromURI = (input: string) : string=> {
+export const resolveFilePathFromURI = (input: string) : string => {
     try {
-        return sanitizePath(path.resolve(input).toString());
+        const inputString: string = input.toString();
+        const resolvedPathString: string = (path.resolve(inputString)).toString();
+        return sanitizePath(resolvedPathString);
     } catch (err) {
-        throw new Error('Error resolving file path from URI')
+        throw new Error('Error resolving file path from URI');
     }
-}
+};
 
-export const getDocumentDirectory = (activeDocumentFilePath: string) => {
-    return sanitizePath(
-        path.dirname(
-            path.resolve(activeDocumentFilePath.toString()
-        )
-    ).toString());
-}
+export const getDocumentDirectory = (filePath: string): string  => {
+    const resolvedPathString = resolveFilePathFromURI(filePath);
+    const directoryNameString = (path.dirname(resolvedPathString)).toString();
+    return sanitizePath(directoryNameString);
+};
 
-export const returnImportFilepathString = (activeFile: string, targetFilePath: string) => {
-    const resolvedActiveDirectory = sanitizePath(path.resolve(getDocumentDirectory(activeFile)))
-    const resolvedTargetFile = sanitizePath(path.resolve(targetFilePath))
-    
-    const resolvedTargetFileDirectory = getDocumentDirectory(resolvedTargetFile)
-
-    const relativePath = sanitizePath(path.relative(resolvedActiveDirectory, resolvedTargetFile));
-
-    if ((resolvedActiveDirectory === resolvedTargetFileDirectory) || (resolvedTargetFileDirectory.startsWith(resolvedActiveDirectory))) {
-        return './' + relativePath;
-    }
-
-    return relativePath;
-}
+export const getRelativePath = (from: string, to: string): string => {
+    const fromString = resolveFilePathFromURI(from);
+    const toString = resolveFilePathFromURI(to);
+    const resolvedString = (path.relative(fromString, toString)).toString();
+    return resolvedString;
+};

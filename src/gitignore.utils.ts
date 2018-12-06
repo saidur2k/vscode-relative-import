@@ -1,7 +1,6 @@
 const fs = require('fs');
 
-export const loadGitignoreRules = (gitignorePath: string) => {
-
+const mapGitignoreRules = (gitignorePath: string) => {
     return fs.readFileSync(gitignorePath, {encoding: 'utf8'})
         .split('\n')
         // Filter out empty lines and comments.
@@ -11,11 +10,11 @@ export const loadGitignoreRules = (gitignorePath: string) => {
         .map((pattern: string) => pattern[0] === '!' ? ['', pattern.substring(1)] : ['', pattern])
 
         // Filter out hidden files/directories (i.e. starting with a dot).
-        .filter((patternPair: string) => {
-            const pattern = patternPair[1];
-            return pattern.indexOf('/.') === -1 && pattern.indexOf('.') !== 0;
-        })
-        
+        // .filter((patternPair: string) => {
+        //     const pattern = patternPair[1];
+        //     return pattern.indexOf('/.') === -1 && pattern.indexOf('.') !== 0;
+        // })
+
         // Patterns not starting with '/' are in fact "starting" with '**/'. Since that would
         // catch a lot of files, restrict it to directories we check.
         // Patterns starting with '/' are relative to the project directory and glob would
@@ -36,4 +35,15 @@ export const loadGitignoreRules = (gitignorePath: string) => {
             result.push(`${ pattern }/**`);
             return result;
         }, []);
+};
+
+export const gitIgnoreRules = (gitIgnorePath: string) => {
+    const gitIgnoreFileExists = fs.readFileSync(gitIgnorePath);
+    let gitIgnoreRules: string[] = [];
+    if (gitIgnoreFileExists) {
+        gitIgnoreFileExists.toString().split('\n').map((row: string) => gitIgnoreRules.push(row));
+        gitIgnoreRules = mapGitignoreRules(gitIgnorePath);
+    }
+
+    return gitIgnoreRules;
 };

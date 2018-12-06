@@ -1,4 +1,5 @@
 import { window, workspace } from 'vscode';
+import { sanitizePath } from '../filesystem.utils';
 
 export const getWorkspaceFolder = () => {
     const editor = window.activeTextEditor;
@@ -6,10 +7,11 @@ export const getWorkspaceFolder = () => {
         const res = editor.document.uri;
         const folder = workspace.getWorkspaceFolder(res);
         if (folder) {
-            return folder.uri.fsPath.replace(/\\/g, "/");
+            return sanitizePath(folder.uri.fsPath);
         } else {
-            window.showErrorMessage('Error getting workspace path');
-            return ""
+            throw new Error('Error getting workspace path.');
         }
+    } else {
+        throw new Error('Could not access Editor context.');
     }
-}
+};
