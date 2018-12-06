@@ -31,7 +31,7 @@ Alternatively,
 ## Release Notes
 
 ### 1.3.0
-Cached project file lookup from Quick pick
+Cached project file lookup from Quick pick. Major refactor.
 
 ### 1.2.2
 Minor updates
