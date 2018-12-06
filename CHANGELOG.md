@@ -4,6 +4,9 @@ All notable changes to the "relative-import" extension will be documented in thi
 ## [Unreleased]
 - Better warning messaging
 
+## [1.3.1]
+- Bug fix.
+
 ## [1.3.0]
 - Cached project file lookup from Quick pick. Major refactor.
 

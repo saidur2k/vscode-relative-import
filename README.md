@@ -30,6 +30,9 @@ Alternatively,
 
 ## Release Notes
 
+### 1.3.1
+Bug fix.
+
 ### 1.3.0
 Cached project file lookup from Quick pick. Major refactor.
 
